@@ -136,3 +136,28 @@ def print_sudoku(board):
                 print(" " +str(board[row][col]) + " ", end="")
     print("- - - - - - - - - - - - - - - - -")
     print("\n")
+
+################################################################################################################################
+                                                 #Numpy Sudoku Checker#
+################################################################################################################################
+
+def numpy_check_row(arr,i):
+    #check the length of the list of unique elements for each row
+    return len(np.unique(arr[i])) == 9
+    
+    
+def numpy_check_col(arr,i):
+    #check the length of the list of unique elements for each col
+    return len(np.unique(arr[:,i])) == 9 
+      
+def numpy_check_block(arr,i):
+    #check the length of the list of unique elements for each matrix 3*3
+    return len(np.unique(arr[i//3+i//3*2 : i//3*3+3, i%3+i%3*2 : i%3*3+3])) == 9
+            
+
+def numpy_sudoku_checker(arr):
+    #iterate in the 9 row, 9col and 9 matrix 3*3
+    for i in range(9):
+        if numpy_check_row(arr,i) != True or numpy_check_col(arr,i) != True or numpy_check_block(arr,i) != True:
+             return print("Grille non valide")
+    return print("Grille valide")
