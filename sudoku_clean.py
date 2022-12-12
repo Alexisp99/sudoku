@@ -268,3 +268,108 @@ def numpy_sudoku_checker(arr):
         if numpy_check_row(arr,i) != True or numpy_check_col(arr,i) != True or numpy_check_block(arr,i) != True:
              return print("Grille non valide")
     return print("Grille valide")
+
+################################################################################################################################
+                                                 #Numpy Sudoku Solver#
+################################################################################################################################
+
+def numpy_sudoku_solver(arr):
+    # initialisation de la condition de sortie
+    global n
+    n = 0
+    if numpy_replace_value(arr) == False:
+        print("Cette grille comporte plusieurs solutions")
+    else :
+        print("Cette grille est unique")
+
+def numpy_replace_value(arr):
+    global n
+    
+    #Condition de sortie
+    if n > 1:
+        return False
+    
+    #find zero in array
+    result = np.where(arr == 0)
+    list_coordinates= list(zip(result[0], result[1]))
+      
+    for coordinate in list_coordinates:
+        for number in range(1,10):
+            if check_blocks(arr,number,coordinate) == False and check_rows(arr,number,coordinate) == False and check_cols(arr,number,coordinate) == False:
+                arr[coordinate] = number
+                            
+                if np.count_nonzero(arr) == 81 :
+                    n+=1
+                    print_sudoku(arr)
+                    
+                #Backtracking,si le nombre choisi bloque le prochain chemin, backtrack ici, et prend le nombre 
+                #suivant de la liste. 
+                #Si la liste est vide, passe à l'étape d'après
+                numpy_replace_value(arr)
+                
+                arr[coordinate] = 0
+                
+            #Si la liste est vide return False si le nombre de solution n > 1, sinon return True
+        return False if n > 1 else True
+
+def check_blocks(arr,number,coordinate):
+    #Retourne Truesi le nombre est présent sur une matrice 3*3
+    x = coordinate[0]
+    y = coordinate[1]
+    return number in arr[x//3+x//3*2 : x//3*3+3, y//3+y//3*2 : y//3*3+3]
+             
+def check_rows(arr,number,coordinate):
+    #Retourne True si le nombre est présent sur une ligne
+    x = coordinate[0]
+    return number in arr[x]
+
+def check_cols(arr, number,coordinate):
+    #Retourne True si le nombre est présent sur une colonne
+    y = coordinate[1]
+    return number in arr[:,y]
+
+################################################################################################################################
+                                     #Sudoku Solver without verify unique solution#
+################################################################################################################################
+
+def not_unique_sudoku_solver(arr):
+    
+    #find zero
+    result = np.where(arr == 0)
+    list_coordinates= list(zip(result[0], result[1]))
+    
+    for coordinate in list_coordinates:
+        for number in range(1,10):  
+            if checks_blocks(arr,number,coordinate) == False and checks_rows(arr,number,coordinate) == False and checks_cols(arr,number,coordinate) == False:
+                arr[coordinate] = number
+
+                #Backtracking,si le nombre choisi bloque le prochain chemin, backtrack ici, et prend le nombre 
+                #suivant de la liste. 
+                #Si la liste est vide, passe à l'étape d'après
+                if not_unique_sudoku_solver(arr) == True:
+                    return True
+                
+                arr[coordinate] = 0
+
+        #Si la liste est vide return False  
+        return False
+    
+    #return True une fois que notre liste de coordonnée est vide
+    print_sudoku(arr)
+    return True
+       
+def checks_blocks(arr,number,coordinate):
+    #Retourne True si le nombre est présent sur une matrice 3*3
+    x = coordinate[0]
+    y = coordinate[1]
+    return number in arr[x//3+x//3*2 : x//3*3+3, y//3+y//3*2 : y//3*3+3]
+           
+def checks_rows(arr,number,coordinate):
+    #Retourne True si le nombre est présent sur une ligne
+    x = coordinate[0]
+    return number in arr[x]
+
+def checks_cols(arr, number,coordinate):
+    #Retourne True si le nombre est présent sur une colonne
+    y = coordinate[1]
+    return number in arr[:,y]
