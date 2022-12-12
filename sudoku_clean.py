@@ -243,7 +243,7 @@ def remove_value(df):
 
 def pick_difficulty():
     return input("choose difficulty : easy | medium | hard ")
-    
+
 ################################################################################################################################
                                                  #Numpy Sudoku Checker#
 ################################################################################################################################
@@ -251,16 +251,16 @@ def pick_difficulty():
 def numpy_check_row(arr,i):
     #check the length of the list of unique elements for each row
     return len(np.unique(arr[i])) == 9
-    
-    
+
+
 def numpy_check_col(arr,i):
     #check the length of the list of unique elements for each col
-    return len(np.unique(arr[:,i])) == 9 
-      
+    return len(np.unique(arr[:,i])) == 9
+
 def numpy_check_block(arr,i):
     #check the length of the list of unique elements for each matrix 3*3
     return len(np.unique(arr[i//3+i//3*2 : i//3*3+3, i%3+i%3*2 : i%3*3+3])) == 9
-            
+
 
 def numpy_sudoku_checker(arr):
     #iterate in the 9 row, 9col and 9 matrix 3*3
@@ -284,31 +284,31 @@ def numpy_sudoku_solver(arr):
 
 def numpy_replace_value(arr):
     global n
-    
+
     #Condition de sortie
     if n > 1:
         return False
-    
+
     #find zero in array
     result = np.where(arr == 0)
     list_coordinates= list(zip(result[0], result[1]))
-      
+
     for coordinate in list_coordinates:
         for number in range(1,10):
             if check_blocks(arr,number,coordinate) == False and check_rows(arr,number,coordinate) == False and check_cols(arr,number,coordinate) == False:
                 arr[coordinate] = number
-                            
+
                 if np.count_nonzero(arr) == 81 :
                     n+=1
                     print_sudoku(arr)
-                    
-                #Backtracking,si le nombre choisi bloque le prochain chemin, backtrack ici, et prend le nombre 
-                #suivant de la liste. 
+
+                #Backtracking,si le nombre choisi bloque le prochain chemin, backtrack ici, et prend le nombre
+                #suivant de la liste.
                 #Si la liste est vide, passe à l'étape d'après
                 numpy_replace_value(arr)
-                
+
                 arr[coordinate] = 0
-                
+
             #Si la liste est vide return False si le nombre de solution n > 1, sinon return True
         return False if n > 1 else True
 
@@ -317,7 +317,7 @@ def check_blocks(arr,number,coordinate):
     x = coordinate[0]
     y = coordinate[1]
     return number in arr[x//3+x//3*2 : x//3*3+3, y//3+y//3*2 : y//3*3+3]
-             
+
 def check_rows(arr,number,coordinate):
     #Retourne True si le nombre est présent sur une ligne
     x = coordinate[0]
@@ -333,37 +333,37 @@ def check_cols(arr, number,coordinate):
 ################################################################################################################################
 
 def not_unique_sudoku_solver(arr):
-    
+
     #find zero
     result = np.where(arr == 0)
     list_coordinates= list(zip(result[0], result[1]))
-    
+
     for coordinate in list_coordinates:
-        for number in range(1,10):  
+        for number in range(1,10):
             if checks_blocks(arr,number,coordinate) == False and checks_rows(arr,number,coordinate) == False and checks_cols(arr,number,coordinate) == False:
                 arr[coordinate] = number
 
-                #Backtracking,si le nombre choisi bloque le prochain chemin, backtrack ici, et prend le nombre 
-                #suivant de la liste. 
+                #Backtracking,si le nombre choisi bloque le prochain chemin, backtrack ici, et prend le nombre
+                #suivant de la liste.
                 #Si la liste est vide, passe à l'étape d'après
                 if not_unique_sudoku_solver(arr) == True:
                     return True
-                
+
                 arr[coordinate] = 0
 
-        #Si la liste est vide return False  
+        #Si la liste est vide return False
         return False
-    
+
     #return True une fois que notre liste de coordonnée est vide
     print_sudoku(arr)
     return True
-       
+
 def checks_blocks(arr,number,coordinate):
     #Retourne True si le nombre est présent sur une matrice 3*3
     x = coordinate[0]
     y = coordinate[1]
     return number in arr[x//3+x//3*2 : x//3*3+3, y//3+y//3*2 : y//3*3+3]
-           
+
 def checks_rows(arr,number,coordinate):
     #Retourne True si le nombre est présent sur une ligne
     x = coordinate[0]
@@ -373,3 +373,110 @@ def checks_cols(arr, number,coordinate):
     #Retourne True si le nombre est présent sur une colonne
     y = coordinate[1]
     return number in arr[:,y]
+
+################################################################################################################################
+                                     #Sudoku Creator without verify unique solution#
+################################################################################################################################
+
+def grid() :
+    grid = ([
+    [".", ".", ".", ".", ".", ".", ".", ".", "."],
+    [".", ".", ".", ".", ".", ".", ".", ".", "."],
+    [".", ".", ".", ".", ".", ".", ".", ".", "."],
+    [".", ".", ".", ".", ".", ".", ".", ".", "."],
+    [".", ".", ".", ".", ".", ".", ".", ".", "."],
+    [".", ".", ".", ".", ".", ".", ".", ".", "."],
+    [".", ".", ".", ".", ".", ".", ".", ".", "."],
+    [".", ".", ".", ".", ".", ".", ".", ".", "."],
+    [".", ".", ".", ".", ".", ".", ".", ".", "."],
+    ])
+
+    return pd.DataFrame(grid)
+
+
+def not_unique_sudoku_creator():
+
+    # initialisation de la condition de sortie
+    global m
+    m = 0
+    not_unique_replace_values(grid())
+
+def not_unique_replace_values(df):
+    global m
+
+    #Condition de sortie
+    if check_full(df):
+        m+=1
+        remove_value(df)
+        print_sudoku(df)
+        return True
+
+    #Parcours le tableau
+    for i in range(0,9,3):
+        for j in range(0,9,3):
+
+            #Parcours le tableau par matrice de 3*3
+            for x in range(i,i+3):
+                for y in range(j,j+3):
+
+                    # Si une case est vide, créer une liste des valeurs présente sur chaque ligne, colonne et block
+                    if df[x][y] not in [i for i in range(1,10)]:
+                        liste = list(set(check_row(df,y) + check_col(df,x) + check_block(df,i,j)))
+
+                        # Prend un nombre qui n'est pas dans la listes des valeurs présente
+                        for i in nb_choice(liste):
+
+                            df[x][y] = i
+
+
+                            #Backtracking,si le nombre choisi bloque le prochain chemin, backtrack ici, et prend le nombre
+                            #suivant de la liste.
+                            #Si la liste est vide, passe à l'étape d'après
+                            not_unique_replace_values(df)
+
+                            df[x][y] = 0
+                            if m > 0:
+                                return True
+
+
+                        #Si la liste est vide return False si le nombre de solution n > 1, sinon return True
+
+                        return False
+
+    #Affiche chaque solution et incrémente +1 n pour chaque solution trouvé
+
+    return True
+
+def check_full(df):
+    count = 0
+    for i in range(9):
+        for j in range(9):
+            if df[i][j] in [1,2,3,4,5,6,7,8,9]:
+                count+=1
+    if count == 81:
+        return True
+
+def remove_value(df):
+    difficulty = pick_difficulty()
+    nb_zero = 0
+    if difficulty == "easy" :
+        max_zero = 30
+    elif difficulty == "medium":
+        max_zero = 40
+    elif difficulty == "hard":
+        max_zero = 50
+    else :
+        max_zero = 10
+
+    while nb_zero < max_zero :
+
+        x = random.randint(0,8)
+        y = random.randint(0,8)
+        if df[x][y] != 0 :
+            df[x][y] = 0
+            nb_zero+=1
+        if replace_value(df,True) == False:
+            random.shuffle(df)
+
+def pick_difficulty():
+    return input("choose difficulty : easy | medium | hard ")
