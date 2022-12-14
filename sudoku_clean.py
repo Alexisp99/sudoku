@@ -22,10 +22,12 @@ def check_block(i,j,df):
     
 
 def sudoku_checker(df):
+
+    df = check_entry_value(df)
     if verif_h_v(df) != True:
         return "Grille non valide"
     #Parcours le dataframe et donne le premier chiffre de chaque matrice
-    #i représente les colonnes et j les lignes
+    #i represente les colonnes et j les lignes
     for i in range(0,9,3):
         for j in range(0,9,3):
             if check_block(i,j,df) != True:
@@ -270,11 +272,15 @@ def numpy_check_block(arr,i):
             
 
 def numpy_sudoku_checker(arr):
+    arr = numpy_check_entry_value(arr)
     #iterate in the 9 row, 9col and 9 matrix 3*3
     for i in range(9):
         if numpy_check_row(arr,i) != True or numpy_check_col(arr,i) != True or numpy_check_block(arr,i) != True:
              return print("Grille non valide")
     return print("Grille valide")
+
+def numpy_check_entry_value(arr):
+    return arr.to_numpy()
 
 ################################################################################################################################
                                                  #Numpy Sudoku Solver#
@@ -284,6 +290,7 @@ def numpy_sudoku_solver(arr):
     # initialisation de la condition de sortie
     global n
     n = 0
+    arr = numpy_check_entry_value(arr)
     if numpy_replace_value(arr) == False:
         print("Cette grille comporte plusieurs solutions")
     else :
@@ -340,7 +347,7 @@ def check_cols(arr, number,coordinate):
 ################################################################################################################################
 
 def not_unique_sudoku_solver(arr):
-    
+    arr = numpy_check_entry_value(arr)
     #find zero
     result = np.where(arr == 0)
     list_coordinates= list(zip(result[0], result[1]))
